@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Psicométrica Laboral</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for graphical results -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js for generating PDF reports directly in browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                            900: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .step-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .custom-radio:checked + label {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            color: #1e40af;
+        }
+        /* Custom radio styling for forced choice */
+        .fc-most:checked + span {
+            background-color: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+        .fc-least:checked + span {
+            background-color: #f43f5e;
+            color: white;
+            border-color: #e11d48;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Portal de Evaluación Talento</h1>
+                    <p class="text-xs text-slate-500">Examen Psicométrico Multi-Competencia</p>
+                </div>
+            </div>
+            <!-- Timer Display -->
+            <div id="timerContainer" class="hidden items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-mono text-sm font-semibold">
+                <i class="fa-regular fa-clock text-brand-600"></i>
+                <span id="timer">00:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
+
+        <!-- Progress Bar Container -->
+        <div id="progressSection" class="hidden mb-8 no-print">
+            <div class="flex justify-between items-center mb-2">
+                <span id="stepIndicator" class="text-xs font-semibold uppercase tracking-wider text-brand-600">Módulo 1 de 5</span>
+                <span id="percentIndicator" class="text-xs font-medium text-slate-500">20% Completado</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div id="progressBar" class="bg-brand-600 h-2.5 rounded-full transition-all duration-500" style="width: 20%"></div>
+            </div>
+        </div>
+
+        <!-- ================= STEP 0: REGISTRATION ================= -->
+        <section id="step0" class="step-card bg-white p-6 sm:p-10 rounded-2xl shadow-sm border border-slate-200">
+            <div class="max-w-2xl mx-auto">
+                <div class="text-center mb-8">
+                    <div class="inline-flex p-3 rounded-full bg-brand-50 text-brand-600 mb-3">
+                        <i class="fa-solid fa-user-gear text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Bienvenido al Proceso de Selección</h2>
+                    <p class="text-slate-600 mt-2 text-sm sm:text-base">
+                        Esta evaluación psicométrica mide tus aptitudes analíticas, competencias laborales, perfil de personalidad e integridad profesional.
+                    </p>
+                </div>
+
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg mb-8 text-sm text-amber-800">
+                    <p class="font-semibold flex items-center gap-2 mb-1">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Instrucciones Importantes:
+                    </p>
+                    <ul class="list-disc list-inside space-y-1 text-amber-700">
+                        <li>La prueba consta de 5 módulos breves.</li>
+                        <li>En el Módulo de Personalidad utilizarás un formato de <strong>Elección Forzada</strong> (seleccionar qué cualidad te describe MÁS y cuál MENOS).</li>
+                        <li>Al finalizar, se generará un reporte integral listo para enviar por WhatsApp, Correo y descargar en PDF.</li>
+                    </ul>
+                </div>
+
+                <form id="candidateForm" onsubmit="startTest(event)" class="space-y-5">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-slate-700 mb-1">Nombre Completo *</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-regular fa-user"></i>
+                            </span>
+                            <input type="text" id="fullName" required placeholder="Ej. María García López" 
+                                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="position" class="block text-sm font-medium text-slate-700 mb-1">Puesto al que Postulas *</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </span>
+                            <input type="text" id="position" required placeholder="Ej. Analista de Operaciones / Gerente de Proyecto" 
+                                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="candidateEmail" class="block text-sm font-medium text-slate-700 mb-1">Tu Correo Electrónico (Opcional)</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-regular fa-envelope"></i>
+                            </span>
+                            <input type="email" id="candidateEmail" placeholder="ejemplo@correo.com" 
+                                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg flex items-center justify-center space-x-2 mt-4">
+                        <span>Iniciar Evaluación</span>
+                        <i class="fa-solid fa-arrow-right text-sm"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 1 & MODULE 2 HTML REMAIN EXACTLY THE SAME ================= -->
+        <section id="step1" class="step-card hidden bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <div class="border-b border-slate-100 pb-4 mb-6">
+                <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Módulo 1</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">Razonamiento Lógico y Capacidad Cognitiva</h2>
+                <p class="text-slate-500 text-sm mt-1">Evalúa el razonamiento abstracto, patrón numérico y deducción lógica.</p>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Question 1 -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-base mb-3">1. Serie Numérica: ¿Qué número continúa en la secuencia?</p>
+                    <div class="bg-white p-3 rounded-lg border border-slate-200 inline-block font-mono font-bold text-brand-700 text-lg mb-4 tracking-wider">
+                        2, 5, 10, 17, 26, <span class="underline text-brand-500">___</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <input type="radio" id="m1q1a" name="m1q1" value="A" class="hidden custom-radio">
+                            <label for="m1q1a" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">A</span> 33
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q1b" name="m1q1" value="B" class="hidden custom-radio">
+                            <label for="m1q1b" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">B</span> 35
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q1c" name="m1q1" value="C" class="hidden custom-radio">
+                            <label for="m1q1c" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">C</span> 37
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q1d" name="m1q1" value="D" class="hidden custom-radio">
+                            <label for="m1q1d" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">D</span> 40
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-base mb-3">2. Analogía Verbal: Selecciona la palabra que completa la relación.</p>
+                    <div class="bg-white p-3 rounded-lg border border-slate-200 inline-block font-medium text-slate-700 text-sm mb-4">
+                        <span class="font-bold text-brand-700">Cuerpo</span> es a <span class="font-bold text-brand-700">Sombra</span> como <span class="font-bold text-brand-700">Idea</span> es a: <span class="underline font-bold text-brand-500">___</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <input type="radio" id="m1q2a" name="m1q2" value="A" class="hidden custom-radio">
+                            <label for="m1q2a" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">A</span> Pensamiento
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q2b" name="m1q2" value="B" class="hidden custom-radio">
+                            <label for="m1q2b" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">B</span> Acción
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q2c" name="m1q2" value="C" class="hidden custom-radio">
+                            <label for="m1q2c" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">C</span> Cerebro
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q2d" name="m1q2" value="D" class="hidden custom-radio">
+                            <label for="m1q2d" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">D</span> Memoria
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-base mb-3">3. Razonamiento Lógico-Deductivo:</p>
+                    <p class="text-slate-600 text-sm mb-4 bg-white p-3 rounded-lg border border-slate-200 italic">
+                        "Si todos los analistas utilizan hoja de cálculo y ningún practicante utiliza hoja de cálculo, ¿cuál de las siguientes afirmaciones es estrictamente cierta?"
+                    </p>
+                    <div class="space-y-3">
+                        <div>
+                            <input type="radio" id="m1q3a" name="m1q3" value="A" class="hidden custom-radio">
+                            <label for="m1q3a" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">A</span> Algunos practicantes son analistas.
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q3b" name="m1q3" value="B" class="hidden custom-radio">
+                            <label for="m1q3b" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">B</span> Ningún practicante es analista.
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q3c" name="m1q3" value="C" class="hidden custom-radio">
+                            <label for="m1q3c" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">C</span> Todos los analistas son practicantes.
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m1q3d" name="m1q3" value="D" class="hidden custom-radio">
+                            <label for="m1q3d" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">D</span> Ninguna de las anteriores.
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+                <button type="button" onclick="goToStep(0)" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all">
+                    Atrás
+                </button>
+                <button type="button" onclick="validateAndNext(1)" class="px-6 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm shadow transition-all flex items-center space-x-2">
+                    <span>Siguiente Módulo</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+        <section id="step2" class="step-card hidden bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <div class="border-b border-slate-100 pb-4 mb-6">
+                <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Módulo 2</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">Razonamiento Verbal y Comprensión Operativa</h2>
+                <p class="text-slate-500 text-sm mt-1">Evalúa la síntesis de información corporativa y la atención al detalle normativo.</p>
+            </div>
+
+            <!-- Context Reading Box -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 text-slate-800">
+                <div class="flex items-center space-x-2 text-brand-800 font-bold mb-2 text-sm">
+                    <i class="fa-solid fa-file-contract"></i>
+                    <span>Texto Normativo de Referencia:</span>
+                </div>
+                <blockquote class="italic text-sm sm:text-base leading-relaxed text-slate-700 bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
+                    "La política interna exige que toda solicitud de reembolso superior a $1,000 sea aprobada por el Gerente de Área y enviada a Contabilidad antes del día 20 de cada mes. Las solicitudes enviadas después de esa fecha se procesarán en el ciclo del mes siguiente, sin excepción."
+                </blockquote>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Question 4 -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-base mb-3">4. Un empleado entrega una solicitud de $1,200 el día 22 del mes, con la firma correspondiente del Gerente de Área. ¿Qué ocurrirá según el texto?</p>
+                    <div class="space-y-3">
+                        <div>
+                            <input type="radio" id="m2q1a" name="m2q1" value="A" class="hidden custom-radio">
+                            <label for="m2q1a" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">A</span> Se rechaza la solicitud por exceso de monto.
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m2q1b" name="m2q1" value="B" class="hidden custom-radio">
+                            <label for="m2q1b" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">B</span> Se paga inmediatamente por contar con la firma.
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m2q1c" name="m2q1" value="C" class="hidden custom-radio">
+                            <label for="m2q1c" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">C</span> Se procesa en el ciclo del mes siguiente.
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m2q1d" name="m2q1" value="D" class="hidden custom-radio">
+                            <label for="m2q1d" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0">D</span> Se remite a auditoría externa por incumplimiento.
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-base mb-3">5. Identifica el sinónimo que mejor sustituye a la palabra <span class="underline text-brand-700">"excepción"</span> en el contexto de la norma presentada:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <input type="radio" id="m2q2a" name="m2q2" value="A" class="hidden custom-radio">
+                            <label for="m2q2a" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">A</span> Anomalía
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m2q2b" name="m2q2" value="B" class="hidden custom-radio">
+                            <label for="m2q2b" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">B</span> Exclusión
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m2q2c" name="m2q2" value="C" class="hidden custom-radio">
+                            <label for="m2q2c" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">C</span> Pretexto
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" id="m2q2d" name="m2q2" value="D" class="hidden custom-radio">
+                            <label for="m2q2d" class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600">D</span> Modificación
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+                <button type="button" onclick="goToStep(1)" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all">
+                    Atrás
+                </button>
+                <button type="button" onclick="validateAndNext(2)" class="px-6 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm shadow transition-all flex items-center space-x-2">
+                    <span>Siguiente Módulo</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 3: PERSONALITY (FORCED CHOICE / IPSATIVE MODEL) ================= -->
+        <section id="step3" class="step-card hidden bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <div class="border-b border-slate-100 pb-4 mb-6">
+                <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Módulo 3</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">Perfil de Personalidad (Elección Forzada)</h2>
+                <p class="text-slate-500 text-sm mt-1">En cada bloque de 4 características, selecciona cuál te describe <strong>MÁS</strong> y cuál te describe <strong>MENOS</strong>. No puedes marcar ambas en la misma característica.</p>
+            </div>
+
+            <div class="space-y-8" id="forcedChoiceContainer">
+                <!-- Block 1 -->
+                <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-slate-800 text-sm mb-3">Bloque 1: Estilo de Ejecución</h3>
+                    <div class="grid grid-cols-12 gap-2 text-xs font-semibold text-slate-500 mb-2 px-2">
+                        <div class="col-span-8">Características</div>
+                        <div class="col-span-2 text-center text-emerald-700">MÁS</div>
+                        <div class="col-span-2 text-center text-rose-700">MENOS</div>
+                    </div>
+
+                    <!-- Row A -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200 mb-2">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Planifico detalladamente antes de iniciar una tarea (Organización)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_most" value="ORG" class="hidden fc-most" onchange="checkForcedChoice('b1', 'ORG', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_least" value="ORG" class="hidden fc-least" onchange="checkForcedChoice('b1', 'ORG', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Row B -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200 mb-2">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Mantengo la calma y el enfoque bajo alta presión (Calma)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_most" value="STR" class="hidden fc-most" onchange="checkForcedChoice('b1', 'STR', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_least" value="STR" class="hidden fc-least" onchange="checkForcedChoice('b1', 'STR', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Row C -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200 mb-2">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Tomo la iniciativa para dirigir al equipo en desacuerdos (Liderazgo)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_most" value="LID" class="hidden fc-most" onchange="checkForcedChoice('b1', 'LID', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_least" value="LID" class="hidden fc-least" onchange="checkForcedChoice('b1', 'LID', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Row D -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Reviso minuciosamente los datos evitando cualquier error (Detalle)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_most" value="DET" class="hidden fc-most" onchange="checkForcedChoice('b1', 'DET', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b1_least" value="DET" class="hidden fc-least" onchange="checkForcedChoice('b1', 'DET', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Block 2 -->
+                <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-slate-800 text-sm mb-3">Bloque 2: Adaptabilidad y Trabajo en Equipo</h3>
+                    <div class="grid grid-cols-12 gap-2 text-xs font-semibold text-slate-500 mb-2 px-2">
+                        <div class="col-span-8">Características</div>
+                        <div class="col-span-2 text-center text-emerald-700">MÁS</div>
+                        <div class="col-span-2 text-center text-rose-700">MENOS</div>
+                    </div>
+
+                    <!-- Row A -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200 mb-2">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Establezco metas estrictas de tiempos y entregables (Organización)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_most" value="ORG" class="hidden fc-most" onchange="checkForcedChoice('b2', 'ORG', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_least" value="ORG" class="hidden fc-least" onchange="checkForcedChoice('b2', 'ORG', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Row B -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200 mb-2">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Me adapto rápidamente cuando cambian las reglas del proyecto (Calma)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_most" value="STR" class="hidden fc-most" onchange="checkForcedChoice('b2', 'STR', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_least" value="STR" class="hidden fc-least" onchange="checkForcedChoice('b2', 'STR', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Row C -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200 mb-2">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Prefiero trabajar de forma autónoma con mínima supervisión (Liderazgo)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_most" value="LID" class="hidden fc-most" onchange="checkForcedChoice('b2', 'LID', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_least" value="LID" class="hidden fc-least" onchange="checkForcedChoice('b2', 'LID', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Row D -->
+                    <div class="grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-lg border border-slate-200">
+                        <span class="col-span-8 text-sm text-slate-700 font-medium">Verifico con rigor la calidad final antes de publicar cualquier entregable (Detalle)</span>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_most" value="DET" class="hidden fc-most" onchange="checkForcedChoice('b2', 'DET', 'most')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">M</span>
+                            </label>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="b2_least" value="DET" class="hidden fc-least" onchange="checkForcedChoice('b2', 'DET', 'least')">
+                                <span class="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs transition-all">L</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+                <button type="button" onclick="goToStep(2)" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all">
+                    Atrás
+                </button>
+                <button type="button" onclick="validateAndNext(3)" class="px-6 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm shadow transition-all flex items-center space-x-2">
+                    <span>Siguiente Módulo</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 4 & MODULE 5 HTML REMAIN EXACTLY THE SAME ================= -->
+        <section id="step4" class="step-card hidden bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <div class="border-b border-slate-100 pb-4 mb-6">
+                <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Módulo 4</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">Evaluación de Comportamiento Laboral</h2>
+                <p class="text-slate-500 text-sm mt-1">Mide la toma de decisiones, priorización y gestión de conflictos en un caso real.</p>
+            </div>
+
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                <p class="font-semibold text-slate-800 text-base mb-3">11. Escenario de Priorización y Gestión de Stakeholders:</p>
+                <div class="bg-white p-4 rounded-lg border border-slate-200 text-slate-700 text-sm mb-5 leading-relaxed shadow-sm">
+                    Estás a punto de finalizar la jornada laboral y tu supervisor te pide un informe urgente para mañana a primera hora. Al mismo tiempo, tienes pendiente responder un correo crítico de un cliente importante que se encuentra muy molesto. ¿Cómo procedes?
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <input type="radio" id="m4q1a" name="m4q1" value="A" class="hidden custom-radio">
+                        <label for="m4q1a" class="flex items-start p-3.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm">
+                            <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0 mt-0.5">A</span>
+                            <span>Respondo al cliente inmediatamente para evitar escalar el problema y dejo el informe del supervisor para trabajarlo a primera hora de la mañana.</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="m4q1b" name="m4q1" value="B" class="hidden custom-radio">
+                        <label for="m4q1b" class="flex items-start p-3.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm">
+                            <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0 mt-0.5">B</span>
+                            <span>Trabajo exclusivamente en el informe del supervisor, me quedo el tiempo necesario para terminarlo y dejo al cliente para atenderlo al día siguiente.</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="m4q1c" name="m4q1" value="C" class="hidden custom-radio">
+                        <label for="m4q1c" class="flex items-start p-3.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm">
+                            <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0 mt-0.5">C</span>
+                            <span>Evalúo el tiempo requerido para ambos, respondo brevemente al cliente para calmar la situación indicando cuándo le daré solución completa y avanzo con el informe prioritario.</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" id="m4q1d" name="m4q1" value="D" class="hidden custom-radio">
+                        <label for="m4q1d" class="flex items-start p-3.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm">
+                            <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center mr-3 font-semibold text-xs text-slate-600 shrink-0 mt-0.5">D</span>
+                            <span>Le explico formalmente a mi supervisor que no puedo realizar el informe urgente por dedicarme a atender al cliente molesto.</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+                <button type="button" onclick="goToStep(3)" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all">
+                    Atrás
+                </button>
+                <button type="button" onclick="validateAndNext(4)" class="px-6 py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm shadow transition-all flex items-center space-x-2">
+                    <span>Siguiente Módulo</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+        <section id="step5" class="step-card hidden bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <div class="border-b border-slate-100 pb-4 mb-6">
+                <span class="text-xs font-bold text-rose-600 uppercase tracking-wider">Módulo 5</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">Integridad y Normas Laborales</h2>
+                <p class="text-slate-500 text-sm mt-1">Evalúa el compromiso normativo, puntualidad, ética laboral y gestión de recursos.</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Question 12: Absenteeism & Punctuality -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-sm sm:text-base mb-3">12. ¿En qué medida consideras justificable que un colaborador falte o llegue tarde a su jornada sin previo aviso si cumplió con sus metas semanales?</p>
+                    <div class="space-y-2.5">
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q1" value="1" class="mr-3 text-brand-600"> Totalmente inaceptable; el horario y la asistencia son compromisos innegociables.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q1" value="2" class="mr-3 text-brand-600"> Solo si se trata de un imprevisto familiar o de salud de fuerza mayor.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q1" value="3" class="mr-3 text-brand-600"> Es comprensible de vez en cuando si el trabajo acumulado ya fue entregado.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q1" value="4" class="mr-3 text-brand-600"> Completamente aceptable; lo único relevante son las metas alcanzadas.
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 13: Asset Management & Theft Propensity -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-sm sm:text-base mb-3">13. Observas que un compañero lleva a su casa material/equipo menor de la empresa de forma continua sin autorización. ¿Cuál es tu postura?</p>
+                    <div class="space-y-2.5">
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q2" value="1" class="mr-3 text-brand-600"> Reportarlo confidencialmente a mi superior o al área de auditoría interna.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q2" value="2" class="mr-3 text-brand-600"> Hablar en privado con la persona para aconsejarle devolver los bienes antes de que intervengan.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q2" value="3" class="mr-3 text-brand-600"> No intervenir, ya que no es mi responsabilidad vigilar a mis compañeros.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q2" value="4" class="mr-3 text-brand-600"> Considerarlo algo menor que no perjudica realmente las finanzas de la empresa.
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 14: Error Hiding & Honesty -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-sm sm:text-base mb-3">14. Si cometieras un error administrativo o técnico costoso que nadie más notó, ¿qué acción tomarías?</p>
+                    <div class="space-y-2.5">
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q3" value="1" class="mr-3 text-brand-600"> Informar de inmediato a mi jefe directo con un plan de corrección sugerido.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q3" value="2" class="mr-3 text-brand-600"> Intentar solucionarlo discretamente por mi cuenta sin comentarlo si se arregla a tiempo.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q3" value="3" class="mr-3 text-brand-600"> Esperar a ver si la empresa lo detecta antes de dar alguna explicación.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q3" value="4" class="mr-3 text-brand-600"> Minimizar la responsabilidad personal atribuyéndola a fallas de proceso o sistema.
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Question 15: Policy justification -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                    <p class="font-semibold text-slate-800 text-sm sm:text-base mb-3">15. ¿Qué opinas sobre saltarse reglamentos o políticas si eso permite terminar un trabajo más rápido?</p>
+                    <div class="space-y-2.5">
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q4" value="1" class="mr-3 text-brand-600"> Inaceptable; los procedimientos garantizan seguridad, calidad y control de riesgos.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q4" value="2" class="mr-3 text-brand-600"> Solo es admisible si se cuenta con autorización expresa de la jefatura.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q4" value="3" class="mr-3 text-brand-600"> Aceptable de manera rutinaria si la regla parece obsoleta o burocrática.
+                        </label>
+                        <label class="flex items-center p-3 rounded-lg border border-slate-200 bg-white cursor-pointer hover:border-brand-300 transition-all text-sm font-medium">
+                            <input type="radio" name="m5q4" value="4" class="mr-3 text-brand-600"> Lo importante son los resultados inmediatos sin importar la vía utilizada.
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+                <button type="button" onclick="goToStep(4)" class="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-sm transition-all">
+                    Atrás
+                </button>
+                <button type="button" onclick="finishTest()" class="px-7 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                    <span>Completar y Mostrar Resultados</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= FULL VISUAL RESULTS DASHBOARD (VISUAL TO EVALUATOR & CANDIDATE) ================= -->
+        <section id="resultsStep" class="hidden space-y-8">
+            <!-- Action Bar (PDF, WhatsApp, Email) -->
+            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4 no-print">
+                <div>
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice text-emerald-400"></i>
+                        <span>Informe Psicométrico Ejecutivo</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Exporta o envía los resultados resumidos para la toma de decisiones de Recursos Humanos.</p>
+                </div>
+                <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
+                    <button onclick="downloadPDF()" class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg text-sm transition-all flex items-center justify-center gap-2 shadow">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Descargar PDF (con Gráfica)</span>
+                    </button>
+                    <button onclick="shareWhatsApp()" class="flex-1 sm:flex-none px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg text-sm transition-all flex items-center justify-center gap-2 shadow">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        <span>Compartir WhatsApp</span>
+                    </button>
+                    <button onclick="sendMailto()" class="flex-1 sm:flex-none px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-lg text-sm transition-all flex items-center justify-center gap-2 shadow">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>Enviar a Correo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDF Printable Container -->
+            <div id="pdfReportContainer" class="bg-white p-8 sm:p-10 rounded-2xl shadow-sm border border-slate-200 space-y-8">
+                
+                <!-- Report Header & Candidate Card -->
+                <div class="border-b border-slate-200 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <div class="inline-block px-3 py-1 bg-brand-100 text-brand-800 text-xs font-extrabold rounded-full uppercase tracking-wider mb-2">
+                            REPORTE TÉCNICO DE SELECCIÓN DE TALENTO
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900" id="resCandidateName">María García López</h2>
+                        <p class="text-base text-slate-600 font-medium mt-0.5" id="resPosition"><i class="fa-solid fa-briefcase text-brand-600 mr-1.5"></i>Puesto: Analista de Operaciones</p>
+                    </div>
+                    <div class="text-left sm:text-right text-xs text-slate-600 space-y-1 bg-slate-50 p-4 rounded-xl border border-slate-200 w-full sm:w-auto">
+                        <p><strong>Fecha de Evaluación:</strong> <span id="resDate">-</span></p>
+                        <p><strong>Tiempo de Resolución:</strong> <span id="resTime">-</span></p>
+                        <p><strong>Destinatario HR:</strong> isrivas489@gmail.com</p>
+                    </div>
+                </div>
+
+                <!-- Global Hiring Recommendation Banner -->
+                <div id="recommendationBanner" class="p-5 rounded-2xl border flex items-center space-x-4 bg-emerald-50 border-emerald-200 text-emerald-950 shadow-sm">
+                    <div id="recIcon" class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shrink-0 font-bold shadow">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs uppercase font-extrabold tracking-wider text-emerald-700">Dictamen Final de Selección</span>
+                        <h4 id="recTitle" class="text-xl font-extrabold text-emerald-900 leading-tight">CANDIDATO RECOMENDADO PARA EL PUESTO</h4>
+                        <p id="recDesc" class="text-xs sm:text-sm text-emerald-800 mt-1">El candidato demuestra un equilibrio óptimo entre agilidad mental, perfil conductual deseado y bajo nivel de riesgo ético.</p>
+                    </div>
+                </div>
+
+                <!-- Section 1 & 2 Grid: Cognitive Metrics + Radar Chart -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Cognitive Breakdown -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-brain text-brand-600"></i>
+                                    <span>Capacidad Cognitiva y Verbal</span>
+                                </h3>
+                                <span id="cogBadge" class="px-2.5 py-1 rounded-md text-xs font-bold bg-brand-100 text-brand-800">
+                                    -
+                                </span>
+                            </div>
+
+                            <div class="space-y-4 mb-4">
+                                <!-- Logical Score Bar -->
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">Razonamiento Lógico-Matemático</span>
+                                        <span id="m1ScoreText" class="text-brand-700 font-bold">0 / 3 (0%)</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2">
+                                        <div id="m1ProgressBar" class="bg-brand-600 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Verbal Score Bar -->
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">Comprensión Verbal y Normativa</span>
+                                        <span id="m2ScoreText" class="text-brand-700 font-bold">0 / 2 (0%)</span>
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2">
+                                        <div id="m2ProgressBar" class="bg-brand-600 h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-3.5 rounded-xl border border-slate-200 text-xs text-slate-700">
+                            <strong class="text-slate-900 block mb-0.5">Diagnóstico Cognitivo:</strong>
+                            <p id="cogDiag" class="text-slate-600 leading-relaxed">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Personality Radar Chart -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 mb-3 flex items-center gap-2 w-full">
+                            <i class="fa-solid fa-chart-pie text-brand-600"></i>
+                            <span>Perfil de Personalidad y Estilo Laboral</span>
+                        </h3>
+                        <div class="w-full h-[220px] flex items-center justify-center">
+                            <canvas id="radarChart" style="max-height: 220px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Integrity & Work Ethics Audit -->
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-200 pb-3">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-rose-600"></i>
+                            <span>Auditoría de Ética, Integridad y Gestión de Riesgos</span>
+                        </h3>
+                        <span id="integrityRiskBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                            Riesgo Bajo
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-start space-x-3">
+                            <div id="semAbsence" class="w-3 h-3 rounded-full bg-emerald-500 mt-1 shrink-0"></div>
+                            <div>
+                                <p class="font-bold text-slate-900">Puntualidad y Asistencia:</p>
+                                <p class="text-slate-600 mt-0.5" id="auditAbsence">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-start space-x-3">
+                            <div id="semTheft" class="w-3 h-3 rounded-full bg-emerald-500 mt-1 shrink-0"></div>
+                            <div>
+                                <p class="font-bold text-slate-900">Uso de Recursos y Bienes:</p>
+                                <p class="text-slate-600 mt-0.5" id="auditTheft">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-start space-x-3">
+                            <div id="semHonesty" class="w-3 h-3 rounded-full bg-emerald-500 mt-1 shrink-0"></div>
+                            <div>
+                                <p class="font-bold text-slate-900">Transparencia ante Errores:</p>
+                                <p class="text-slate-600 mt-0.5" id="auditHonesty">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 flex items-start space-x-3">
+                            <div id="semRules" class="w-3 h-3 rounded-full bg-emerald-500 mt-1 shrink-0"></div>
+                            <div>
+                                <p class="font-bold text-slate-900">Adhesión a Normas e Instrucciones:</p>
+                                <p class="text-slate-600 mt-0.5" id="auditRules">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Recommended HR Interview Questions -->
+                <div class="bg-blue-50 border border-blue-200 p-6 rounded-2xl">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-blue-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-brand-600"></i>
+                        <span>Preguntas Sugeridas para la Entrevista presencial con HR</span>
+                    </h3>
+                    <ul class="space-y-2 text-xs sm:text-sm text-blue-900 list-disc list-inside font-medium" id="suggestedQuestions">
+                        <li>"Proporcióname un ejemplo de una situación de alta presión donde tuviste que priorizar varias tareas simultáneas."</li>
+                        <li>"¿Cómo procedes cuando identificas una política de la empresa que retrasa la entrega de tu trabajo?"</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto no-print">
+        <div class="max-w-5xl mx-auto px-4 text-center text-xs text-slate-500">
+            Sistema de Evaluación de Competencias y Conducta Laboral &copy; 2026 - Configurado para envío a isrivas489@gmail.com.
+        </div>
+    </footer>
+
+    <!-- Custom Modal Alert -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center border border-slate-100">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <h3 id="modalTitle" class="text-lg font-bold text-slate-900 mb-2">Atención</h3>
+            <p id="modalMessage" class="text-sm text-slate-600 mb-6">Por favor responde todas las preguntas del módulo antes de continuar.</p>
+            <button onclick="closeModal()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg transition-colors text-sm">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // ... existing JavaScript state variables ...
+
+        function finishTest() {
+            const m5q1 = document.querySelector('input[name="m5q1"]:checked');
+            const m5q2 = document.querySelector('input[name="m5q2"]:checked');
+            const m5q3 = document.querySelector('input[name="m5q3"]:checked');
+            const m5q4 = document.querySelector('input[name="m5q4"]:checked');
+
+            if (!m5q1 || !m5q2 || !m5q3 || !m5q4) {
+                showAlert("Por favor responde a todas las preguntas del Módulo 5 de Integridad.");
+                return;
+            }
+
+            stopTimer();
+
+            // Cognitive Scoring
+            let m1Score = 0;
+            if (document.querySelector('input[name="m1q1"]:checked')?.value === correctAnswers.m1q1) m1Score++;
+            if (document.querySelector('input[name="m1q2"]:checked')?.value === correctAnswers.m1q2) m1Score++;
+            if (document.querySelector('input[name="m1q3"]:checked')?.value === correctAnswers.m1q3) m1Score++;
+
+            let m2Score = 0;
+            if (document.querySelector('input[name="m2q1"]:checked')?.value === correctAnswers.m2q1) m2Score++;
+            if (document.querySelector('input[name="m2q2"]:checked')?.value === correctAnswers.m2q2) m2Score++;
+
+            const totalCognitive = m1Score + m2Score;
+
+            // Forced Choice Personality Scoring
+            const traitScores = { ORG: 50, STR: 50, LID: 50, DET: 50 };
+            ['b1', 'b2'].forEach(block => {
+                const m = document.querySelector(`input[name="${block}_most"]:checked`)?.value;
+                const l = document.querySelector(`input[name="${block}_least"]:checked`)?.value;
+                if (m && traitScores[m] !== undefined) traitScores[m] += 25;
+                if (l && traitScores[l] !== undefined) traitScores[l] -= 15;
+            });
+
+            // Integrity Audit Calculation
+            const rAbsence = parseInt(m5q1.value);
+            const rTheft = parseInt(m5q2.value);
+            const rHonesty = parseInt(m5q3.value);
+            const rRules = parseInt(m5q4.value);
+            const totalIntegrityScore = rAbsence + rTheft + rHonesty + rRules;
+
+            // Render Candidate Data
+            document.getElementById('resCandidateName').innerText = candidateData.fullName;
+            document.getElementById('resPosition').innerText = `Puesto: ${candidateData.position}`;
+            document.getElementById('resDate').innerText = new Date().toLocaleDateString('es-ES');
+            
+            const mins = Math.floor(timerSeconds / 60);
+            const secs = timerSeconds % 60;
+            document.getElementById('resTime').innerText = `${mins}m ${secs}s`;
+
+            // Cognitive Progress Bars
+            const m1Pct = Math.round((m1Score / 3) * 100);
+            const m2Pct = Math.round((m2Score / 2) * 100);
+            document.getElementById('m1ScoreText').innerText = `${m1Score} / 3 (${m1Pct}%)`;
+            document.getElementById('m1ProgressBar').style.width = `${m1Pct}%`;
+
+            document.getElementById('m2ScoreText').innerText = `${m2Score} / 2 (${m2Pct}%)`;
+            document.getElementById('m2ProgressBar').style.width = `${m2Pct}%`;
+
+            const cogBadge = document.getElementById('cogBadge');
+            const cogDiag = document.getElementById('cogDiag');
+            if (totalCognitive >= 4) {
+                cogBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+                cogBadge.innerText = "Alto Desempeño";
+                cogDiag.innerText = "Capacidad analítica alta. Procesa problemas complejos con soltura e interpreta normativas sin ambigüedades.";
+            } else if (totalCognitive >= 3) {
+                cogBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800";
+                cogBadge.innerText = "Promedio Operativo";
+                cogDiag.innerText = "Capacidad de análisis adecuada. Desempeño estable dentro de los requerimientos estándar del puesto.";
+            } else {
+                cogBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
+                cogBadge.innerText = "Atención Requerida";
+                cogDiag.innerText = "Puede requerir acompañamiento para asimilar instrucciones normativas complejas o análisis de datos.";
+            }
+
+            // Integrity Audit Traffic Lights
+            setTrafficLight('semAbsence', rAbsence);
+            setTrafficLight('semTheft', rTheft);
+            setTrafficLight('semHonesty', rHonesty);
+            setTrafficLight('semRules', rRules);
+
+            document.getElementById('auditAbsence').innerText = rAbsence <= 2 ? "Alineado con el compromiso horario y puntualidad." : "Riesgo: Justifica impuntualidades o ausencias no planificadas.";
+            document.getElementById('auditTheft').innerText = rTheft <= 2 ? "Respeto riguroso por los activos y bienes de la empresa." : "Riesgo: Muestra tolerancia ante el uso indebido de recursos.";
+            document.getElementById('auditHonesty').innerText = rHonesty <= 2 ? "Disposición a reportar de inmediato cualquier fallo cometido." : "Riesgo: Tendencia a ocultar errores por temor a repercusiones.";
+            document.getElementById('auditRules').innerText = rRules <= 2 ? "Apego estricto a procesos y políticas establecidas." : "Riesgo: Disposición a omitir reglas por rapidez.";
+
+            // Global Recommendation & Suggested Interview Questions
+            const riskBadge = document.getElementById('integrityRiskBadge');
+            const recBanner = document.getElementById('recommendationBanner');
+            const recIcon = document.getElementById('recIcon');
+            const recTitle = document.getElementById('recTitle');
+            const recDesc = document.getElementById('recDesc');
+            const questionsList = document.getElementById('suggestedQuestions');
+
+            let customQuestions = [];
+
+            if (totalIntegrityScore >= 11) {
+                riskBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800";
+                riskBadge.innerText = "Riesgo Alto";
+
+                recBanner.className = "p-5 rounded-2xl border flex items-center space-x-4 bg-rose-50 border-rose-200 text-rose-950 shadow-sm";
+                recIcon.className = "w-14 h-14 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-2xl shrink-0 font-bold shadow";
+                recIcon.innerHTML = '<i class="fa-solid fa-user-xmark"></i>';
+                recTitle.innerText = "CANDIDATO NO RECOMENDADO";
+                recDesc.innerText = "Se observan indicadores críticos en la auditoría de integridad laboral y apego normativo.";
+
+                customQuestions = [
+                    '"Describe alguna ocasión en la que cometiste un error costoso en el trabajo: ¿cómo lo comunicaste y quién lo resolvió?"',
+                    '"¿Cuál es tu postura si un equipo o proceso interno te parece innecesariamente burocrático?"'
+                ];
+            } else if (totalIntegrityScore >= 7 || totalCognitive <= 2) {
+                riskBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
+                riskBadge.innerText = "Riesgo Medio";
+
+                recBanner.className = "p-5 rounded-2xl border flex items-center space-x-4 bg-amber-50 border-amber-200 text-amber-950 shadow-sm";
+                recIcon.className = "w-14 h-14 rounded-2xl bg-amber-600 text-white flex items-center justify-center text-2xl shrink-0 font-bold shadow";
+                recIcon.innerHTML = '<i class="fa-solid fa-user-clock"></i>';
+                recTitle.innerText = "APTO CON RESERVAS / INDAGAR EN ENTREVISTA";
+                recDesc.innerText = "El candidato cumple requerimientos básicos pero presenta aspectos a profundizar en entrevista presencial.";
+
+                customQuestions = [
+                    '"Cuéntanos sobre alguna situación donde tuviste un desacuerdo con las reglas de puntualidad de tu anterior empleo."',
+                    '"¿Cómo reaccionas cuando tu supervisor te asigna una tarea urgente con muy poco tiempo para revisarla?"'
+                ];
+            } else {
+                riskBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+                riskBadge.innerText = "Riesgo Bajo";
+
+                recBanner.className = "p-5 rounded-2xl border flex items-center space-x-4 bg-emerald-50 border-emerald-200 text-emerald-950 shadow-sm";
+                recIcon.className = "w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shrink-0 font-bold shadow";
+                recIcon.innerHTML = '<i class="fa-solid fa-user-check"></i>';
+                recTitle.innerText = "CANDIDATO RECOMENDADO";
+                recDesc.innerText = "Excelente balance entre capacidad de análisis, ética profesional y adecuación al rol.";
+
+                customQuestions = [
+                    '"¿Cuáles son las condiciones de trabajo que te permiten mantener tu máximo nivel de motivación e integridad?"',
+                    '"Comparte un logro profesional reciente donde tu enfoque en la precisión y el orden marcara la diferencia."'
+                ];
+            }
+
+            questionsList.innerHTML = customQuestions.map(q => `<li>${q}</li>`).join('');
+
+            // Render Radar Chart WITH ANIMATION DISABLED FOR PDF RENDERING
+            renderRadarChart([traitScores.ORG, traitScores.STR, traitScores.LID, traitScores.DET]);
+
+            // Compile Executive Text for External Sharing
+            compiledReportText = `*INFORME PSICOMÉTRICO EJECUTIVO*
+*Candidato:* ${candidateData.fullName}
+*Puesto:* ${candidateData.position}
+*Fecha:* ${new Date().toLocaleDateString('es-ES')}
+----------------------------------
+*Capacidad Cognitiva:* ${totalCognitive}/5 aciertos
+*Nivel de Riesgo Ético:* ${riskBadge.innerText}
+*Dictamen HR:* ${recTitle.innerText}
+----------------------------------
+*Enviado automáticamente a:* isrivas489@gmail.com`;
+
+            // Switch Screen
+            document.getElementById('progressSection').classList.add('hidden');
+            document.getElementById('timerContainer').classList.add('hidden');
+            document.getElementById('step5').classList.add('hidden');
+            document.getElementById('resultsStep').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setTrafficLight(elementId, val) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            if (val <= 2) {
+                el.className = "w-3 h-3 rounded-full bg-emerald-500 mt-1 shrink-0";
+            } else if (val === 3) {
+                el.className = "w-3 h-3 rounded-full bg-amber-500 mt-1 shrink-0";
+            } else {
+                el.className = "w-3 h-3 rounded-full bg-rose-500 mt-1 shrink-0";
+            }
+        }
+
+        // Render Chart.js Radar WITHOUT ANIMATION FOR IMMUTABLE CANVAS CAPTURE
+        function renderRadarChart(dataPoints) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) radarChartInstance.destroy();
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Organización', 'Tolerancia Estrés', 'Autonomía/Liderazgo', 'Atención al Detalle'],
+                    datasets: [{
+                        label: 'Competencia %',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(37, 99, 235, 0.25)',
+                        borderColor: '#1d4ed8',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#1e40af',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    animation: false, // CRITICAL FOR HTML2PDF SYNCHRONOUS CANVAS PRINTING
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#cbd5e1' },
+                            grid: { color: '#e2e8f0' },
+                            suggestedMin: 20,
+                            suggestedMax: 100,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // PDF Generation function with delay to guarantee complete Canvas render
+        function downloadPDF() {
+            const element = document.getElementById('pdfReportContainer');
+            
+            // Temporary scale up for clean print layout
+            const opt = {
+                margin:       [0.3, 0.3, 0.3, 0.3],
+                filename:     `Psicometrico_${candidateData.fullName.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Small timeout ensures Chart canvas is completely static
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save();
+            }, 300);
+        }
+    </script>
+</body>
+</html>
